@@ -3,17 +3,17 @@ import traceback
 
 from alize import STRING_SET
 
-class NoirError(Exception):
+class AlizeError(Exception):
     details = None # {<string>:<base type>, ... }
 
     def __init__(self, details):
         if not type(details) == dict:
-            raise Exception('NoirError : details must be a dictionary.')
+            raise Exception('AlizeError : details must be a dictionary.')
         for key in details:
             if type(key) not in STRING_SET:
-                raise Exception('NoirError : details key must be strings.')
+                raise Exception('AlizeError : details key must be strings.')
         if 'message' not in details:
-            raise Exception('NoirError : details must have message field.')
+            raise Exception('AlizeError : details must have message field.')
         if 'type' not in details:
             details['type'] = type(self).__name__
         self.details = details
@@ -52,15 +52,15 @@ class NoirError(Exception):
         sys.stderr.write(self.format_trace())
         sys.stderr.flush()
 
-class TimeoutError(NoirError):
+class TimeoutError(AlizeError):
     def __init__(self, details):
         if type(details) in STRING_SET:
             details = {
                 'message': details
             }
-        NoirError.__init__(self, details)
+        AlizeError.__init__(self, details)
 
-class RunError(NoirError):
+class RunError(AlizeError):
     def __init__(self, cmd, out, message=''):
         details = {
             'cmd'       : cmd     or '',
@@ -68,33 +68,41 @@ class RunError(NoirError):
             'out'       : out     or '',
             'message'   : message or ''
         }
-        NoirError.__init__(self, details)
+        AlizeError.__init__(self, details)
 
     def __str__(self):
         return '%s:\n%s:\n%s' % (
             self.cmd, self.message, self.out
         )
 
-class LogError(NoirError):
+class LogError(AlizeError):
     def __init__(self, details):
         if type(details) in STRING_SET:
             details = {
                 'message': details
             }
-        NoirError.__init__(self, details)
+        AlizeError.__init__(self, details)
 
-class WorkspaceError(NoirError):
+class WorkspaceError(AlizeError):
     def __init__(self, details):
         if type(details) in STRING_SET:
             details = {
                 'message': details
             }
-        NoirError.__init__(self, details)
+        AlizeError.__init__(self, details)
 
-class AndroidError(NoirError):
+class AndroidError(AlizeError):
     def __init__(self, details):
         if type(details) in STRING_SET:
             details = {
                 'message' : details
             }
-        NoirError.__init__(self, details)
+        AlizeError.__init__(self, details)
+
+class PictureError(AlizeError):
+    def __init__(self, details):
+        if type(details) in STRING_SET:
+            details = {
+                'message' : details
+            }
+        AlizeError.__init__(self, details)

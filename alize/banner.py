@@ -20,4 +20,4 @@ class Banner(object):
                       ", VirthalWidth = " + str(self.virtual_width) + \
                       ", VirthalHeight = " + str(self.virtual_height) + \
                       ", Orientation = " + str(self.orientation) + \
-                      ", Quirks = " + str(self.qrirks) + "]"
+                      ", Quirks = " + str(self.quirks) + " ]"

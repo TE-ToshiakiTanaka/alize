@@ -8,8 +8,6 @@ import argparse
 from alize.adbkit import Android
 MINICAP_PATH = os.path.abspath(os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "minicap"))
-ROTATEW_PATH = os.path.abspath(os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "RotationWatcher.apk", "mobile"))
 
 def argument():
     parser = argparse.ArgumentParser(
@@ -56,7 +54,7 @@ def install(serial):
 
     dstdir = "//data//local//tmp//minicap-devel"
     a.shell("mkdir %s 2>/dev/null || true" % (dstdir))
-    s = size(a); args = "-P %s@%s/0" % (s, s); print(args)
+    # s = size(a); args = "-P %s@%s/0" % (s, s); print(args)
     srcdir = os.path.join(MINICAP_PATH, "libs", abi, binary)
     srcjnidir = os.path.join(MINICAP_PATH, "jni", "minicap-shared", "aosp", "libs", "android-%s" % sdk, abi, "minicap.so")
     a.push(srcdir, dstdir)
