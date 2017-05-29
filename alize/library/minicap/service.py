@@ -17,7 +17,7 @@ class Factory(object):
         return __version__
 
     def get(self, ip, port):
-        return MinicapStream(ip, port)
+        return MinicapStream.get_builder(ip, port)
 
 
 NAME = "alize.minicap"

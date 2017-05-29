@@ -13,7 +13,7 @@ from alize.application import AlizeRunner
 from alize.workspace import Workspace
 
 from blue.utility import *
-#from blue.script.testcase_base import TestCase_Unit
+from blue.script.testcase_base import TestCase_Unit
 
 class TestRunner(object):
     def __init__(self):
@@ -25,7 +25,7 @@ class TestRunner(object):
         self.log = self.workspace.mkdir("log")
         self.report = self.workspace.mkdir("report")
 
-        #TestCase_Unit.register(LIB_DIR)
+        TestCase_Unit.register(LIB_DIR)
 
     def execute(self, script):
         self.runner.execute(script, SCRIPT_DIR)
