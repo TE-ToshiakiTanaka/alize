@@ -21,7 +21,7 @@ TEMPLATE = os.path.abspath(os.path.join(PATH, "GAAZCY05D1882F9"))
 class Alize(object):
     def __init__(self, ip="127.0.0.1", port=1313, path=""):
         self.workspace = Workspace(path)
-        self.stream = MinicapStream.get_builder(ip, port, path)
+        self.stream = MinicapStream.get_builder(ip, port)
         self.path = path
         self.__flag = True
         self._debug = True
@@ -53,7 +53,7 @@ class Alize(object):
                 self.result.put(result)
 
             if self._debug:
-                resize_image_cv = cv2.resize(image_cv, (640, 360))
+                resize_image_cv = cv2.resize(image_cv, (360, 640))
                 cv2.imshow('debug', resize_image_cv)
                 key = cv2.waitKey(5)
                 if key == 27: break
@@ -92,11 +92,11 @@ if __name__ == "__main__":
     a = Alize(ip="127.0.0.1", port=1313, path=PATH)
     a.start()
     time.sleep(5)
-    print("template matching start.")
-    print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_sortie.png")))
-    print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_supply.png")))
-    print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_docking.png")))
-    print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_home.png")))
+    #print("template matching start.")
+    #print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_sortie.png")))
+    #print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_supply.png")))
+    #print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_docking.png")))
+    #print(a.search_pattern(os.path.join(PATH, "YT911C1ZCP", "action_home.png")))
     time.sleep(5)
     #a.capture_picture("sample01.png", PATH)
     a.finish()

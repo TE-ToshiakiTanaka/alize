@@ -1,14 +1,39 @@
 import os
+import io
 import socket
 import threading
-from banner import Banner
+
 from itsdangerous import bytes_to_int
 from Queue import Queue
 
-import io
 import cv2
 import numpy as np
 from PIL import Image
+
+class Banner(object):
+
+    def __init__(self):
+        self.version = 0
+        self.length = 0
+        self.pid = 0
+        self.real_width = 0
+        self.real_height = 0
+        self.virtual_width = 0
+        self.virtual_height = 0
+        self.orientation = 0
+        self.quirks = 0
+
+    def toString(self):
+        return "Banner [ Version = " + str(self.version) + \
+                      ", Length = " + str(self.length) + \
+                      ", PID = " + str(self.pid) + \
+                      ", RealWidth = " + str(self.real_width) + \
+                      ", RealHeight = " + str(self.real_height) + \
+                      ", VirthalWidth = " + str(self.virtual_width) + \
+                      ", VirthalHeight = " + str(self.virtual_height) + \
+                      ", Orientation = " + str(self.orientation) + \
+                      ", Quirks = " + str(self.quirks) + " ]"
+
 
 class MinicapStream(object):
     __instance = None
@@ -21,6 +46,7 @@ class MinicapStream(object):
         self.banner = Banner()
         self.minicap_socket = None
         self.read_image_stream_task = None
+
         self.push = None
         self.picture = Queue()
         self.__flag = True
@@ -108,13 +134,3 @@ class MinicapStream(object):
                         frame_body_length -= length - cursor
                         read_frame_bytes += length - cursor
                         cursor = length
-
-# adb shell LD_LIBRARY_PATH=/data/local/tmp /data/local/tmp/minicap -P 1200x1920@1200x1920/0
-#             adb forward tcp:1313 localabstract:minicap
-
-if __name__ == '__main__':
-    import time
-    a = MinicapStream.get_builder()
-    a.start()
-    time.sleep(100)
-    a.finish()
