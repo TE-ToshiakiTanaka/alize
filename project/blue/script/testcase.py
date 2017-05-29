@@ -23,12 +23,12 @@ class MinicapProc(object):
         self.result = Queue()
 
     def start(self):
-        self.stream.start()
+        self.tc.minicap.start()
         self.loop = threading.Thread(target=self.main_loop).start()
 
     def finish(self):
         self.__flag = False; time.sleep(2)
-        self.stream.finish()
+        self.tc.minicap.finish()
 
     def __save(self, filename, data):
         with open(filename, "wb") as f:
@@ -46,14 +46,13 @@ class MinicapProc(object):
     def main_loop(self):
         if self._debug: cv2.namedWindow("debug")
         while self.__flag:
-            data = self.stream.picture.get()
+            data = self.tc.minicap.picture.get()
 
             if self.counter % 10 == 0:
                 self.__save_evidence(self.counter / 10)
 
             if self._capture_flag:
                 if self._capture_target != None:
-
 
             image_pil = Image.open(io.BytesIO(data))
             image_cv = cv2.cvtColor(np.asarray(image_pil), cv2.COLOR_RGB2BGR)
@@ -65,19 +64,19 @@ class MinicapProc(object):
                 self.result.put(result)
 
             if self._debug:
-                w = self.tc.adb().get().WIDTH
-                resize_image_cv = cv2.resize(image_cv, (360, 640))
+                w = int(self.tc.adb().get().WIDTH) / 2
+                h = int(self.tc.adb().get().HEIGHT) / 2
+                resize_image_cv = cv2.resize(image_cv, (w, h))
                 cv2.imshow('debug', resize_image_cv)
                 key = cv2.waitKey(5)
                 if key == 27: break
             self.counter += 1
-
         if self._debug: cv2.destroyAllWindows()
-
 
 class TestCase_Base(testcase_base.TestCase_Unit):
     def __init__(self, *args, **kwargs):
         super(TestCase_Base, self).__init__(*args, **kwargs)
+        self.minicap = MinicapProc(self, DEBUG)
 
     def sleep(self, base=1):
         sleep_time = (0.5 + base * random.random())
