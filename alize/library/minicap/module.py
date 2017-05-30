@@ -6,9 +6,14 @@ import threading
 from itsdangerous import bytes_to_int
 from Queue import Queue
 
+from alize.log import Log
+from alize.exception import *
+
 import cv2
 import numpy as np
 from PIL import Image
+
+L = Log("Minicap.Library.ALIZE")
 
 class Banner(object):
 
@@ -112,7 +117,7 @@ class MinicapStream(object):
                     cursor += 1
                     read_banner_bytes += 1
                     if read_banner_bytes == banner_length:
-                        print(self.banner.toString())
+                        L.debug(self.banner.toString())
                 elif read_frame_bytes < 4:
                     frame_body_length = frame_body_length + ((bytes_to_int(reallen[cursor])<<(read_frame_bytes * 8)) >> 0)
                     cursor += 1

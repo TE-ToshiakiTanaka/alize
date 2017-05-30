@@ -30,7 +30,8 @@ class MinicapProc(object):
         self._capture_flag = False # Capture
         self._capture_target = None
         self.counter = 0
-        self.result = Queue()
+        self.patternmatch_result = Queue()
+        self.capture_result = Queue()
 
     def start(self):
         self.tc.minicap.start()
@@ -46,7 +47,7 @@ class MinicapProc(object):
             f.flush()
 
     def __save_cv(self, filename, img_cv):
-        cv2.imwrite(filename, img_cv)
+        return cv2.imwrite(filename, img_cv)
 
     def __save_evidence(self, number, data):
         if number < 10: number = "0000%s" % str(number)
@@ -55,6 +56,20 @@ class MinicapProc(object):
         elif number < 10000: number = "0%s" % str(number)
         else: number = str(number)
         self.__save_cv(os.path.join(TMP_EVIDENCE_DIR, "image_%s.png" % number), data)
+
+    def capture_image(self, filename=None, timeout=1):
+        if filename != None:
+            self._capture_target = filename
+        else: filename = "capture.png"
+        self._capture_flag = True
+        for i in xrange(timeout):
+            result = self.capture_result.get()
+            if result:
+                break
+        abspath = os.path.join(TMP_DIR, filename)
+        self._capture_target = None
+        self._capture_flag = False
+        return abspath
 
     def create_video(self, src, dst, filename="output.avi"):
         output = os.path.join(dst, filename)
@@ -68,21 +83,24 @@ class MinicapProc(object):
         if self._debug: cv2.namedWindow("debug")
         while self._loop_flag:
             data = self.tc.minicap.picture.get()
-            """
-            if self._capture_flag:
-                if self._capture_target != None:
-            """
+
             image_pil = Image.open(io.BytesIO(data))
             image_cv = cv2.cvtColor(np.asarray(image_pil), cv2.COLOR_RGB2BGR)
 
-            if self.counter % 10 == 0:
-                self.__save_evidence(self.counter / 10, image_cv)
+            if self._capture_flag:
+                if self._capture_target != None: outputfile = os.path.join(TMP_DIR, self._capture_target)
+                else: outputfile = os.path.join(TMP_DIR, "capture.png")
+                result = self.__save_cv(outputfile, image_cv)
+                self.capture_result.put(result)
 
             if self._pattern_match_flag:
                 if self._pattern_match_target == None:
                     self.result.put(None)
                 result, image_cv = Picture.search_pattern(image_cv, self._pattern_match_target)
                 self.result.put(result)
+
+            if self.counter % 10 == 0:
+                self.__save_evidence(self.counter / 10, image_cv)
 
             if self._debug:
                 w = int(self.tc.adb.get().WIDTH) / 2
@@ -105,6 +123,9 @@ class TestCase_Base(testcase_base.TestCase_Unit):
 
     def minicap_finish(self):
         self.minicap_proc.finish()
+
+    def screenshot(self, filename=None):
+        return self.minicap_proc.capture_image(filename)
 
     def minicap_create_video(self):
         self.minicap_proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)

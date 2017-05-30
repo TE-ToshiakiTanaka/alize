@@ -25,8 +25,9 @@ class TestRunner(object):
         self.log = self.workspace.mkdir("log")
         self.report = self.workspace.mkdir("report")
 
-        self.tmp_video = self.workspace.mkdir("tmp/video")
-        self.tmp_evidence = self.workspace.mkdir("tmp/evidence")
+        self.tmp_video = self.workspace.mkdir(os.path.join("tmp", "video"))
+        self.workspace.rmdir(os.path.join("tmp", "evidence"))
+        self.tmp_evidence = self.workspace.mkdir(os.path.join("tmp","evidence"))
 
         TestCase_Unit.register(LIB_DIR)
 

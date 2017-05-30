@@ -18,8 +18,9 @@ class TestCase(testcase_normal.TestCase):
         L.info("*** Capture ***")
         self.minicap_start()
         time.sleep(20)
+        L.info(self.screenshot("capture.png"))
+        time.sleep(1)
         self.minicap_finish()
-        #self.adb_screenshot("capture.png")
         time.sleep(2)
         self.minicap_create_video()
 
