@@ -189,6 +189,12 @@ class Android(object):
     def pull(self, src, dst):
         return self._adb.pull(src, dst)
 
+    def forward(self, cmd):
+        if "forward" in cmd:
+            L.debug("command include [forward]. : %s" % cmd)
+        cmd = "forward %s" % cmd
+        return self._adb.adb(cmd)
+
     def input(self, cmd):
         if "input" in cmd:
             L.debug("command include [input]. : %s" % cmd)

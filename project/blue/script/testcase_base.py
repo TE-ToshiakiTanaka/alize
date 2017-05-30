@@ -13,8 +13,8 @@ from blue.utility import LOG as L
 class TestCase_Unit(AlizeTestCase):
     def __init__(self, *args, **kwargs):
         super(TestCase_Unit, self).__init__(*args, **kwargs)
+        self.get_config()
         self.get_service()
-        self.get_config(self.get("args.config"))
 
     def arg_parse(self, parser):
         parser.add_argument(action='store', dest='testcase',
@@ -26,7 +26,7 @@ class TestCase_Unit(AlizeTestCase):
     @classmethod
     def get_service(cls):
         cls.adb = cls.service["alize.android"].get(cls.get("args.mobile"), PROFILE_DIR)
-        cls.minicap = cls.service["alize.minicap"].get()
+        cls.minicap = cls.service["alize.minicap"].get(cls.get("minicap.ip"), int(cls.get("minicap.port")))
         cls.picture = cls.service["alize.picture"].get()
 
     def get_config(cls, conf=None):

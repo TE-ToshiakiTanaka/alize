@@ -17,8 +17,8 @@ class AlizeTestCase(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         global service
-        super(alizeTestCase, self).__init__(*args, **kwargs)
-        self.register(alize_LIB)
+        super(AlizeTestCase, self).__init__(*args, **kwargs)
+        self.register(ALIZE_LIB)
         self.__parse()
 
     @classmethod

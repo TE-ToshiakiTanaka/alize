@@ -25,6 +25,9 @@ class TestRunner(object):
         self.log = self.workspace.mkdir("log")
         self.report = self.workspace.mkdir("report")
 
+        self.tmp_video = self.workspace.mkdir("tmp/video")
+        self.tmp_evidence = self.workspace.mkdir("tmp/evidence")
+
         TestCase_Unit.register(LIB_DIR)
 
     def execute(self, script):

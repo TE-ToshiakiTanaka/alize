@@ -18,6 +18,8 @@ REPORT_DIR = os.path.normpath(os.path.join(WORK_DIR, "report"))
 
 PROFILE_DIR = os.path.normpath(os.path.join(WORK_DIR, "conf", "profile"))
 
+FFMPEG_BIN = os.path.normpath(os.path.join(BIN_DIR, "ffmpeg", "bin", "ffmpeg.exe"))
+
 LOG = log.Log("Blue.Project.ALIZE")
 if not os.path.exists(LOG_DIR):
     os.mkdir(LOG_DIR)
