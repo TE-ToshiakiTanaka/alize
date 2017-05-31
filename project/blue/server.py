@@ -3,6 +3,7 @@ import subprocess
 
 import utility
 from utility import *
+from utility import LOG as L
 
 APP_LOG = os.path.abspath(os.path.join(LOG_DIR, "bin"))
 BIN_PATH = utility.BIN_DIR
@@ -27,7 +28,7 @@ class MinicapService(object):
         BIN = "//data//local//tmp//minicap-devel//minicap"
         ARGS = "%sx%s@%sx%s/%s" % (self.width, self.height, self.width, self.height, self.rotate)
         EXEC = "adb -s %s shell %s %s -P %s" % (self.serial, LD_LIB, BIN, ARGS)
-        print(EXEC)
+        L.debug(EXEC)
         if self.proc is None:
             subprocess_args = { 'stdin'     : subprocess.PIPE,
                                 'stdout'    : self.log,
