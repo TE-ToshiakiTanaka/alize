@@ -60,6 +60,18 @@ class MinicapProc(object):
         else: number = str(number)
         self.__save_cv(os.path.join(TMP_EVIDENCE_DIR, "image_%s.png" % number), data)
 
+    def search_pattern(self, target, count=3):
+        self._pattern_match_target = target
+        self._pattern_match_flag = True
+        ok = 0
+        while ok < count:
+            result = self.patternmatch_result.get()
+            if result != None:
+                ok += 1
+        self._pattern_match_target = None
+        self._pattern_match_flag = False
+        return result
+
     def capture_image(self, filename=None, timeout=1):
         if filename != None:
             self._capture_target = filename
@@ -99,8 +111,8 @@ class MinicapProc(object):
             if self._pattern_match_flag:
                 if self._pattern_match_target == None:
                     self.result.put(None)
-                result, image_cv = Picture.search_pattern(image_cv, self._pattern_match_target)
-                self.result.put(result)
+                result, image_cv = self.tc.pic.search_pattern(image_cv, self._pattern_match_target)
+                self.patternmatch_result.put(result)
 
             if self.counter % 10 == 0:
                 self.__save_evidence(self.counter / 10, image_cv)
@@ -108,7 +120,10 @@ class MinicapProc(object):
             if self._debug:
                 w = int(self.tc.adb.get().WIDTH) / 2
                 h = int(self.tc.adb.get().HEIGHT) / 2
-                resize_image_cv = cv2.resize(image_cv, (w, h))
+                if int(self.tc.adb.get().ROTATE) == 0:
+                    resize_image_cv = cv2.resize(image_cv, (h, w))
+                else:
+                    resize_image_cv = cv2.resize(image_cv, (w, h))
                 cv2.imshow('debug', resize_image_cv)
                 key = cv2.waitKey(5)
                 if key == 27: break
@@ -132,6 +147,9 @@ class TestCase_Base(testcase_base.TestCase_Unit):
 
     def minicap_create_video(self):
         self.minicap_proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)
+
+    def minicap_search_pattern(self, reference):
+        return self.minicap_proc.search_pattern(self.get_reference(reference))
 
     def sleep(self, base=1):
         sleep_time = (0.5 + base * random.random())

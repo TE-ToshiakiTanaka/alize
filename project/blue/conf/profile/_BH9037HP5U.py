@@ -17,7 +17,7 @@ class _BH9037HP5U(android_base.Android):
     WIDTH = "1280"
     HEIGHT = "720"
     LOCATE = "H"
-    ROTATE = "90"
+    ROTATE = "0"
 
     EXERCISES_X = "1060"
     EXERCISES_Y = "260"

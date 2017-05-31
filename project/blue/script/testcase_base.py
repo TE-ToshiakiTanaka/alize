@@ -36,7 +36,7 @@ class TestCase_Unit(AlizeTestCase):
     def get_service(cls):
         cls.adb = cls.service["alize.android"].get(cls.get("args.mobile"), PROFILE_DIR)
         cls.minicap = cls.service["alize.minicap"].get(cls.get("minicap.ip"), int(cls.get("minicap.port")))
-        cls.picture = cls.service["alize.picture"].get()
+        cls.pic = cls.service["alize.picture"].get()
 
     def get_config(cls, conf=None):
         if conf == None:

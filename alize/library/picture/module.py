@@ -227,5 +227,7 @@ class Picture(object):
 
     @classmethod
     def search_pattern(cls, reference, target):
+        if not os.path.exists(target):
+            raise PictureError("it is not exists target file. : %s" % target)
         target_cv = cv2.imread(target, 0)
         return cls.__patternmatch(reference, target_cv)

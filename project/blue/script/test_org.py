@@ -17,7 +17,9 @@ class TestCase(testcase_normal.TestCase):
     def test_1(self):
         L.info("*** Capture ***")
         self.minicap_start()
-        time.sleep(20)
+        time.sleep(10)
+        L.debug(self.minicap_search_pattern("history.png"))
+        time.sleep(10)
         L.info(self.screenshot("capture.png"))
         time.sleep(1)
         self.minicap_finish()
