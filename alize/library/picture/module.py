@@ -14,6 +14,9 @@ except Exception as e:
 from alize.log import Log
 from alize.exception import *
 
+SHARPNESS = 2.0
+CONTRAST = 2.0
+
 PMC_THRESHOLD = 0.96
 L = Log("Picture.Library.ALIZE")
 

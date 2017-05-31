@@ -7,6 +7,8 @@ except:
     import ConfigParser as configparser
 
 from alize.script import AlizeTestCase
+
+from blue.server import MinicapService
 from blue.utility import *
 from blue.utility import LOG as L
 
@@ -15,6 +17,13 @@ class TestCase_Unit(AlizeTestCase):
         super(TestCase_Unit, self).__init__(*args, **kwargs)
         self.get_config()
         self.get_service()
+        self.service = MinicapService("minicap",
+            self.get("args.mobile"), self.adb.get().HEIGHT, self.adb.get().WIDTH, self.adb.get().ROTATE)
+        self.service.start()
+
+    def __del__(self):
+        if self.service != None:
+            self.service.stop()
 
     def arg_parse(self, parser):
         parser.add_argument(action='store', dest='testcase',

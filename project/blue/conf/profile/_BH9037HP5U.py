@@ -7,13 +7,13 @@ if not PATH in sys.path:
 
 import android_base
 
-class _YT911C1ZCP(android_base.Android):
-    SERIAL = "YT911C1ZCP"
+class _BH9037HP5U(android_base.Android):
+    SERIAL = "BH9037HP5U"
     TMP_PICTURE="%s_TMP.png" % SERIAL
     IP = ""
     PORT = ""
 
-    NAME = "Xperia A4"
+    NAME = "Xperia X Compact"
     WIDTH = "1280"
     HEIGHT = "720"
     LOCATE = "H"
@@ -35,4 +35,4 @@ class _YT911C1ZCP(android_base.Android):
     FORMATION_HEIGHT = "75"
 
 if __name__ == "__main__":
-    print(eval("_YT911C1ZCP.%s" % "TMP_PICTURE"))
+    print(eval("_BH9037HP5U.%s" % "TMP_PICTURE"))
