@@ -203,31 +203,44 @@ class Picture(object):
 
 
     @classmethod
-    def _patternmatch(cls, reference, target):
+    def _patternmatch(cls, reference, target, box=None):
         if not os.path.exists(reference):
             raise PictureError("it is not exists reference file. : %s" % reference)
         if not os.path.exists(target):
             raise PictureError("it is not exists target file. : %s" % target)
         reference_cv = cv2.imread(reference)
         target_cv = cv2.imread(target, 0)
-        return cls.__patternmatch(reference_cv, target_cv)
+        return cls.__patternmatch(reference_cv, target_cv, box)
 
     @classmethod
-    def __patternmatch(cls, reference, target):
+    def __patternmatch(cls, reference, target, box=None, tmp=None):
         img_gray = cv2.cvtColor(reference, cv2.COLOR_BGR2GRAY)
+        if len(img_gray.shape) == 3: height, width, channels = img_gray.shape[:3]
+        else: height, width = img_gray.shape[:2]
+        if box != None:
+            cv2.rectangle(reference,
+                          (box.x, box.y),
+                          (box.x + box.width, box.y + box.height), (0, 255, 0), 5)
+            img_gray = img_gray[box.y:(box.y + box.height), box.x:(box.x + box.width)]
+            cv2.imwrite(os.path.join(tmp, "crop.png"), img_gray)
         template = target
         w, h = template.shape[::-1]
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
         loc = np.where( res >= PMC_THRESHOLD)
         result = None
         for pt in zip(*loc[::-1]):
-            result = POINT(pt[0], pt[1], w, h)
-            cv2.rectangle(reference, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 5)
+            if box != None:
+                x = pt[0] + box.x; y = pt[1] + box.y
+                result = POINT(x, y, w, h)
+                cv2.rectangle(reference, (x, y), (x + w, y + h), (0, 0, 255), 5)
+            else:
+                result = POINT(pt[0], pt[1], w, h)
+                cv2.rectangle(reference, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 5)
         return result, reference
 
     @classmethod
-    def search_pattern(cls, reference, target):
+    def search_pattern(cls, reference, target, box=None, tmp=None):
         if not os.path.exists(target):
             raise PictureError("it is not exists target file. : %s" % target)
         target_cv = cv2.imread(target, 0)
-        return cls.__patternmatch(reference, target_cv)
+        return cls.__patternmatch(reference, target_cv, box, tmp)

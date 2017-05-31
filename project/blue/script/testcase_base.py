@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import argparse
 try:
     import configparser
@@ -19,7 +20,7 @@ class TestCase_Unit(AlizeTestCase):
         self.get_service()
         self.service = MinicapService("minicap",
             self.get("args.mobile"), self.adb.get().HEIGHT, self.adb.get().WIDTH, self.adb.get().ROTATE)
-        self.service.start()
+        self.service.start(); time.sleep(1)
 
     def __del__(self):
         if self.service != None:

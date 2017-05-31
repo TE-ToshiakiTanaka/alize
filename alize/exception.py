@@ -91,6 +91,22 @@ class WorkspaceError(AlizeError):
             }
         AlizeError.__init__(self, details)
 
+class TestRunnerError(AlizeError):
+    def __init__(self, details):
+        if type(details) in STRING_SET:
+            details = {
+                'message': details
+            }
+        AlizeError.__init__(self, details)
+
+class LibraryError(AlizeError):
+    def __init__(self, details):
+        if type(details) in STRING_SET:
+            details = {
+                'message' : details
+            }
+        AlizeError.__init__(self, details)
+
 class AndroidError(AlizeError):
     def __init__(self, details):
         if type(details) in STRING_SET:

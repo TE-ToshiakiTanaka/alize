@@ -16,7 +16,7 @@ from alize.cmd import run
 
 from blue.utility import *
 from blue.utility import LOG as L
-from blue.script import testcase_base
+from blue.script import testcase_adb
 
 DEBUG=True
 
@@ -28,6 +28,7 @@ class MinicapProc(object):
 
         self._pattern_match_flag = False # Pattern Match
         self._pattern_match_target = None
+        self._pattern_match_box = None
         self.patternmatch_result = Queue()
 
         self._capture_flag = False # Capture
@@ -60,15 +61,16 @@ class MinicapProc(object):
         else: number = str(number)
         self.__save_cv(os.path.join(TMP_EVIDENCE_DIR, "image_%s.png" % number), data)
 
-    def search_pattern(self, target, count=3):
+    def search_pattern(self, target, box=None, count=3):
         self._pattern_match_target = target
+        self._pattern_match_box = box
         self._pattern_match_flag = True
         ok = 0
         while ok < count:
             result = self.patternmatch_result.get()
-            if result != None:
-                ok += 1
+            ok += 1
         self._pattern_match_target = None
+        self._pattern_match_box = None
         self._pattern_match_flag = False
         return result
 
@@ -111,7 +113,8 @@ class MinicapProc(object):
             if self._pattern_match_flag:
                 if self._pattern_match_target == None:
                     self.result.put(None)
-                result, image_cv = self.tc.pic.search_pattern(image_cv, self._pattern_match_target)
+                result, image_cv = self.tc.pic.search_pattern(
+                    image_cv, self._pattern_match_target, self._pattern_match_box, TMP_DIR)
                 self.patternmatch_result.put(result)
 
             if self.counter % 10 == 0:
@@ -130,7 +133,7 @@ class MinicapProc(object):
             self.counter += 1
         if self._debug: cv2.destroyAllWindows()
 
-class TestCase_Base(testcase_base.TestCase_Unit):
+class TestCase_Base(testcase_adb.TestCase_Android):
     def __init__(self, *args, **kwargs):
         super(TestCase_Base, self).__init__(*args, **kwargs)
         self.minicap_proc = MinicapProc(self, DEBUG)
@@ -148,8 +151,8 @@ class TestCase_Base(testcase_base.TestCase_Unit):
     def minicap_create_video(self):
         self.minicap_proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)
 
-    def minicap_search_pattern(self, reference):
-        return self.minicap_proc.search_pattern(self.get_reference(reference))
+    def minicap_search_pattern(self, reference, box=None):
+        return self.minicap_proc.search_pattern(self.get_reference(reference), box)
 
     def sleep(self, base=1):
         sleep_time = (0.5 + base * random.random())
@@ -168,56 +171,44 @@ class TestCase_Base(testcase_base.TestCase_Unit):
         except Exception as e:
             L.warning(e); raise e
 
-    def tap(self, reference, target=None, threshold=0.2):
-        if target == None:
-            self.adb_screenshot(self.adb.get().TMP_PICTURE)
-            target = self.adb.get().TMP_PICTURE
-        result = self.picture_find_pattern(
-                self.get_target(target), self.get_reference(reference))
+    def tap(self, reference, box=None, threshold=0.2):
+        result = self.minicap_proc.search_pattern(self.get_reference(reference), box)
         if not result == None:
             L.info(self._tap(result, threshold))
             return True
         else: return False
 
     def _tap(self, result, threshold=0.2):
-        if self.adb.get().LOCATE == "H":
+        if self.adb.get().ROTATE == "90":
             x = int(result.x) + random.randint(int(int(result.width) * threshold) , int(int(result.width) * (1.0 - threshold)))
             y = int(result.y) + random.randint(int(int(result.height) * threshold) , int(int(result.height) * (1.0 - threshold)))
         else:
             x = int(result.y) + random.randint(int(int(result.height) * threshold) , int(int(result.height) * (1.0 - threshold)))
             y = int(self.adb.get().WIDTH) - (int(result.x) + random.randint(int(int(result.width) * threshold) , int(int(result.width) * (1.0 - threshold))))
-        return self.adb_tap(x, y)
+        return self.adb.tap(x, y)
 
-    def enable(self, reference, target=None):
+    def enable(self, reference, box=None):
         L.debug("reference : %s" % reference)
-        if target == None:
-            self.adb_screenshot(self.adb.get().TMP_PICTURE)
-            target = self.adb.get().TMP_PICTURE
-        return self.picture_is_pattern(
-            self.get_target(target), self.get_reference(reference))
+        return (self.minicap_proc.search_pattern(self.get_reference(reference), box) != None)
 
-    def find(self, reference, target=None):
+    def find(self, reference, box=None):
         L.debug("reference : %s " % reference)
-        if target == None:
-            self.adb_screenshot(self.adb.get().TMP_PICTURE)
-            target = self.adb.get().TMP_PICTURE
-        result = self.picture_find_pattern(
-            self.get_target(target), self.get_reference(reference))
+        result = self.minicap_proc_search_pattern(self.get_reference(reference), box)
         if not result == None: return result
         else: return None
 
-    def enable_timeout(self, reference, target=None, loop=3, timeout=0.5):
+    def enable_timeout(self, reference, box=None, loop=3, timeout=0.5):
         result = False
         for _ in range(loop):
-            if self.enable(reference, target): result = True; break
+            if self.enable(reference, box): result = True; break
             time.sleep(timeout)
+        if result == False: self.screenshot("failed.png")
         return result
 
-    def tap_timeout(self, reference, target=None, loop=3, timeout=0.5, threshold=0.2):
-        if not self.enable_timeout(reference, target, loop, timeout):
+    def tap_timeout(self, reference, box=None, loop=3, timeout=0.5, threshold=0.2):
+        if not self.enable_timeout(reference, box, loop, timeout):
             return False
-        target = self.adb.get().TMP_PICTURE
-        return self.tap(reference, target, threshold)
+        return self.tap(reference, box, threshold)
 
     def enable_pattern_timeout(self, pattern, loop=3, timeout=0.5):
         targets = self.__search_pattern(pattern)

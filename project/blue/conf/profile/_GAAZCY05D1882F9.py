@@ -17,6 +17,7 @@ class _GAAZCY05D1882F9(android_base.Android):
     WIDTH = "1920"
     HEIGHT = "1080"
     LOCATE = "H"
+    ROTATE = "90"
 
     EXERCISES_X = "1590"
     EXERCISES_Y = "390"
