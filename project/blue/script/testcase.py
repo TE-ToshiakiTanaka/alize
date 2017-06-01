@@ -20,21 +20,30 @@ from blue.script import testcase_adb
 
 DEBUG=True
 
+
+class PatternMatchObject(object):
+    def __init__(_target, _box, flag=True):
+        self.target = _target
+        self.box = _box
+        self.flag = flag
+
+    def __repr__(self):
+        return "PatternMatchObject()"
+
+    def __str__(self):
+        return "(TARGET, POINT) = (%s, %s)" % (self.target, self.box)
+
+
 class MinicapProc(object):
     def __init__(self, testcase, debug=False):
         self.tc = testcase
         self._loop_flag = True
         self._debug = debug # Debug Flag
-
-        self._pattern_match_flag = False # Pattern Match
-        self._pattern_match_target = None
-        self._pattern_match_box = None
+        self._pattern_match = None
         self.patternmatch_result = Queue()
-
         self._capture_flag = False # Capture
         self._capture_target = None
         self.capture_result = Queue()
-
         self.counter = 0
 
     def start(self):
@@ -62,16 +71,13 @@ class MinicapProc(object):
         self.__save_cv(os.path.join(TMP_EVIDENCE_DIR, "image_%s.png" % number), data)
 
     def search_pattern(self, target, box=None, count=10):
-        self._pattern_match_target = target
-        self._pattern_match_box = box
-        self._pattern_match_flag = True
-        ok = 0
-        while ok < count:
+        pmo = PatternMatchObject(target, box)
+        L.info(pmo)
+        self._pattern_match = PatternMatchObject(target, box)
+        for _ in range(count):
             result = self.patternmatch_result.get()
-            ok += 1
-        self._pattern_match_target = None
-        self._pattern_match_box = None
-        self._pattern_match_flag = False
+            if result != None: break
+        self._pattern_match = None
         return result
 
     def capture_image(self, filename=None, timeout=1):
@@ -110,11 +116,9 @@ class MinicapProc(object):
                 result = self.__save_cv(outputfile, image_cv)
                 self.capture_result.put(result)
 
-            if self._pattern_match_flag:
-                if self._pattern_match_target == None:
-                    self.result.put(None)
+            if self._pattern_match != None:
                 result, image_cv = self.tc.pic.search_pattern(
-                    image_cv, self._pattern_match_target, self._pattern_match_box, TMP_DIR)
+                    image_cv, self._pattern_match.target, self._pattern_match.box, TMP_DIR)
                 self.patternmatch_result.put(result)
 
             if self.counter % 10 == 0:
@@ -136,23 +140,23 @@ class MinicapProc(object):
 class TestCase_Base(testcase_adb.TestCase_Android):
     def __init__(self, *args, **kwargs):
         super(TestCase_Base, self).__init__(*args, **kwargs)
-        self.minicap_proc = MinicapProc(self, DEBUG)
+        self.proc = MinicapProc(self, DEBUG)
 
     def minicap_start(self):
         self.adb.forward("tcp:%s localabstract:minicap" % self.get("minicap.port"))
-        self.minicap_proc.start()
+        self.proc.start()
 
     def minicap_finish(self):
-        self.minicap_proc.finish()
+        self.proc.finish()
 
-    def screenshot(self, filename=None):
-        return self.minicap_proc.capture_image(filename)
+    def minicap_screenshot(self, filename=None):
+        return self.proc.capture_image(filename)
 
     def minicap_create_video(self):
-        self.minicap_proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)
+        self.proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)
 
-    def minicap_search_pattern(self, reference, box=None):
-        return self.minicap_proc.search_pattern(self.get_reference(reference), box)
+    def minicap_search_pattern(self, reference, box=None, count=30):
+        return self.proc.search_pattern(self.get_reference(reference), box, count)
 
     def sleep(self, base=1):
         sleep_time = (0.5 + base * random.random())
@@ -172,7 +176,7 @@ class TestCase_Base(testcase_adb.TestCase_Android):
             L.warning(e); raise e
 
     def tap(self, reference, box=None, threshold=0.2):
-        result = self.minicap_proc.search_pattern(self.get_reference(reference), box)
+        result = self.proc.search_pattern(self.get_reference(reference), box)
         if not result == None:
             L.info(self._tap(result, threshold))
             return True
@@ -187,13 +191,13 @@ class TestCase_Base(testcase_adb.TestCase_Android):
             y = int(self.adb.get().WIDTH) - (int(result.x) + random.randint(int(int(result.width) * threshold) , int(int(result.width) * (1.0 - threshold))))
         return self.adb.tap(x, y)
 
-    def enable(self, reference, box=None):
+    def enable(self, reference, box=None, count=30):
         L.debug("reference : %s" % reference)
-        return (self.minicap_proc.search_pattern(self.get_reference(reference), box) != None)
+        return (self.proc.search_pattern(self.get_reference(reference), box, count) != None)
 
     def find(self, reference, box=None):
         L.debug("reference : %s " % reference)
-        result = self.minicap_proc_search_pattern(self.get_reference(reference), box)
+        result = self.proc.search_pattern(self.get_reference(reference), box)
         if not result == None: return result
         else: return None
 
@@ -202,7 +206,7 @@ class TestCase_Base(testcase_adb.TestCase_Android):
         for _ in range(loop):
             if self.enable(reference, box): result = True; break
             time.sleep(timeout)
-        if result == False: self.screenshot("failed.png")
+        if result == False: self.minicap_screenshot("failed.png")
         return result
 
     def tap_timeout(self, reference, box=None, loop=3, timeout=0.5, threshold=0.2):

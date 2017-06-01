@@ -18,8 +18,9 @@ class TestCase_Unit(AlizeTestCase):
         super(TestCase_Unit, self).__init__(*args, **kwargs)
         self.get_config()
         self.get_service()
-        self.service = MinicapService("minicap",
-            self.get("args.mobile"), self.adb.get().HEIGHT, self.adb.get().WIDTH, self.adb.get().ROTATE)
+        self.service = MinicapService("minicap", self.get("args.mobile"),
+            self.adb.get().HEIGHT, self.adb.get().WIDTH,
+            self.adb.get().MINICAP_HEIGHT, self.adb.get().MINICAP_WIDTH, self.adb.get().ROTATE)
         self.service.start(); time.sleep(1)
 
     def __del__(self):

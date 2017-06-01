@@ -8,12 +8,14 @@ from utility import LOG as L
 APP_LOG = os.path.abspath(os.path.join(LOG_DIR, "bin"))
 
 class MinicapService(object):
-    def __init__(self, name, serial, width, height, rotate):
+    def __init__(self, name, serial, width, height, v_width, v_height, rotate):
         if not os.path.exists(APP_LOG):
             os.mkdir(APP_LOG)
         self.serial = serial
         self.width = width
         self.height = height
+        self.v_width = v_width
+        self.v_height = v_height
         self.rotate = rotate # v: 0, h: 90
 
         self.name = name
@@ -24,7 +26,7 @@ class MinicapService(object):
     def start(self):
         LD_LIB = "LD_LIBRARY_PATH=//data//local//tmp//minicap-devel"
         BIN = "//data//local//tmp//minicap-devel//minicap"
-        ARGS = "%sx%s@%sx%s/%s" % (self.width, self.height, self.width, self.height, self.rotate)
+        ARGS = "%sx%s@%sx%s/%s" % (self.width, self.height, self.v_width, self.v_height, self.rotate)
         EXEC = "adb -s %s shell %s %s -P %s" % (self.serial, LD_LIB, BIN, ARGS)
         L.debug(EXEC)
         if self.proc is None:
@@ -53,7 +55,7 @@ class MinicapService(object):
 
 if __name__ == '__main__':
     import time
-    proc = MinicapService("minicap", "BH9037HP5U", "720", "1280", "0")
+    proc = MinicapService("minicap", "BH9037HP5U", "720", "1280", "720", "1280", "0")
     #proc = DartService("minicap")
     proc.start()
     time.sleep(5)
