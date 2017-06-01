@@ -10,6 +10,7 @@ from blue.utility import LOG as L
 from blue.script import testcase
 
 class TestCase(testcase.TestCase_Base):
+
     def initialize(self, form=None):
         if not self.enable_timeout("home.png"):
             self.login(); time.sleep(5)

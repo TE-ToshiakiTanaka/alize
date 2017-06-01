@@ -223,7 +223,7 @@ class Picture(object):
                       (box.x, box.y),
                       (box.x + box.width, box.y + box.height), (0, 255, 0), 5)
         img_gray = img_gray[box.y:(box.y + box.height), box.x:(box.x + box.width)]
-        #cv2.imwrite(os.path.join(tmp, "crop.png"), img_gray)
+        cv2.imwrite(os.path.join(tmp, "crop.png"), img_gray)
         template = target
         w, h = template.shape[::-1]
         res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)

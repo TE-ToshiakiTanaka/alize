@@ -6,8 +6,6 @@ from utility import *
 from utility import LOG as L
 
 APP_LOG = os.path.abspath(os.path.join(LOG_DIR, "bin"))
-BIN_PATH = utility.BIN_DIR
-EXE_PATH = os.path.abspath(os.path.join(utility.BIN_DIR, "Tolo-1.0-SNAPSHOT.jar"))
 
 class MinicapService(object):
     def __init__(self, name, serial, width, height, rotate):
@@ -26,7 +24,7 @@ class MinicapService(object):
     def start(self):
         LD_LIB = "LD_LIBRARY_PATH=//data//local//tmp//minicap-devel"
         BIN = "//data//local//tmp//minicap-devel//minicap"
-        ARGS = "%sx%s@1280x720/%s" % (self.width, self.height, self.rotate)
+        ARGS = "%sx%s@%sx%s/%s" % (self.width, self.height, self.width, self.height, self.rotate)
         EXEC = "adb -s %s shell %s %s -P %s" % (self.serial, LD_LIB, BIN, ARGS)
         L.debug(EXEC)
         if self.proc is None:
