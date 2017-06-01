@@ -19,11 +19,13 @@ class TestCase(testcase.TestCase_Base):
         else: return self.formation(form)
 
     def login(self):
-        self.adb.stop(self.get("kancolle.app"))
-        time.sleep(5)
-        self.adb.invoke(self.get("kancolle.app")); self.sleep()
-        self.tap_timeout("start_music_off.png"); self.sleep()
-        self.tap_timeout("start_game.png"); self.sleep()
+        self.adb.stop(self.get("kancolle.app")); time.sleep(5)
+        self.adb.invoke(self.get("kancolle.app"));
+        time.sleep(5); self.sleep()
+        self.tap_timeout("start_music_off.png")
+        time.sleep(5); self.sleep()
+        self.tap_timeout("start_game.png")
+        time.sleep(5); self.sleep()
         return True
 
     def expedition_result(self):

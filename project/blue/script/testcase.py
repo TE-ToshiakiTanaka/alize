@@ -61,7 +61,7 @@ class MinicapProc(object):
         else: number = str(number)
         self.__save_cv(os.path.join(TMP_EVIDENCE_DIR, "image_%s.png" % number), data)
 
-    def search_pattern(self, target, box=None, count=3):
+    def search_pattern(self, target, box=None, count=10):
         self._pattern_match_target = target
         self._pattern_match_box = box
         self._pattern_match_flag = True
@@ -121,8 +121,8 @@ class MinicapProc(object):
                 self.__save_evidence(self.counter / 10, image_cv)
 
             if self._debug:
-                w = int(self.tc.adb.get().WIDTH) / 2
-                h = int(self.tc.adb.get().HEIGHT) / 2
+                w = int(self.tc.adb.get().MINICAP_WIDTH) / 2
+                h = int(self.tc.adb.get().MINICAP_HEIGHT) / 2
                 if int(self.tc.adb.get().ROTATE) == 0:
                     resize_image_cv = cv2.resize(image_cv, (h, w))
                 else:

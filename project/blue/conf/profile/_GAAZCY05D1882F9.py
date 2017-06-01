@@ -16,6 +16,8 @@ class _GAAZCY05D1882F9(android_base.Android):
     NAME = "ASUS ZenFone"
     WIDTH = "1920"
     HEIGHT = "1080"
+    MINICAP_WIDTH = "1280"
+    MINICAP_HEIGHT = "720"
     LOCATE = "H"
     ROTATE = "90"
 

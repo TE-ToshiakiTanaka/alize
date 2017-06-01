@@ -18,6 +18,7 @@ class TestCase(testcase_normal.TestCase):
         L.info("*** Expedition ***")
         try:
             self.minicap_start()
+            time.sleep(2)
             self.assertTrue(self.initialize("15"))
             #while self.expedition_result(): time.sleep(1)
             time.sleep(2)

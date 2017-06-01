@@ -26,7 +26,7 @@ class MinicapService(object):
     def start(self):
         LD_LIB = "LD_LIBRARY_PATH=//data//local//tmp//minicap-devel"
         BIN = "//data//local//tmp//minicap-devel//minicap"
-        ARGS = "%sx%s@%sx%s/%s" % (self.width, self.height, self.width, self.height, self.rotate)
+        ARGS = "%sx%s@1280x720/%s" % (self.width, self.height, self.rotate)
         EXEC = "adb -s %s shell %s %s -P %s" % (self.serial, LD_LIB, BIN, ARGS)
         L.debug(EXEC)
         if self.proc is None:

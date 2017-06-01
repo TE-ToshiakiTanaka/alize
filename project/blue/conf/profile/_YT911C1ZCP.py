@@ -16,6 +16,8 @@ class _YT911C1ZCP(android_base.Android):
     NAME = "Xperia A4"
     WIDTH = "1280"
     HEIGHT = "720"
+    MINICAP_WIDTH = "1280"
+    MINICAP_HEIGHT = "720"
     LOCATE = "H"
     ROTATE = "90"
 
