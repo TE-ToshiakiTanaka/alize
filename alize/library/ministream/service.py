@@ -6,8 +6,8 @@ LIB_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if not LIB_PATH in sys.path:
     sys.path.insert(0, LIB_PATH)
 
-from minicap import module
-from minicap.module import MinicapStream
+from ministream import module
+from ministream.module import MinicapStream
 
 class Factory(object):
     def __init__(self):

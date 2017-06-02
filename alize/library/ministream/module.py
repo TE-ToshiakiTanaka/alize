@@ -14,6 +14,7 @@ import numpy as np
 from PIL import Image
 
 L = Log("Minicap.Library.ALIZE")
+MAX_SIZE = 5
 
 class Banner(object):
 
@@ -28,7 +29,7 @@ class Banner(object):
         self.orientation = 0
         self.quirks = 0
 
-    def toString(self):
+    def __str__(self):
         return "Banner [ Version = " + str(self.version) + \
                       ", Length = " + str(self.length) + \
                       ", PID = " + str(self.pid) + \
@@ -89,6 +90,7 @@ class MinicapStream(object):
         counter = 0
 
         while self.__flag:
+            #L.info("Picture Queue : %s" % (self.get_d()))
             reallen = self.minicap_socket.recv(4096)
             length = len(reallen)
             if not length: continue
@@ -117,7 +119,7 @@ class MinicapStream(object):
                     cursor += 1
                     read_banner_bytes += 1
                     if read_banner_bytes == banner_length:
-                        L.debug(self.banner.toString())
+                        L.debug(self.banner)
                 elif read_frame_bytes < 4:
                     frame_body_length = frame_body_length + ((bytes_to_int(reallen[cursor])<<(read_frame_bytes * 8)) >> 0)
                     cursor += 1
@@ -128,7 +130,7 @@ class MinicapStream(object):
                         if bytes_to_int(data_body[0]) != 0xFF or bytes_to_int(data_body[1]) != 0xD8:
                             return
                         self.picture.put(data_body)
-                        if self.get_d() > 60: self.picture.get()
+                        if self.get_d() > MAX_SIZE: self.picture.get()
                         cursor += frame_body_length
                         frame_body_length = 0
                         read_frame_bytes = 0
