@@ -31,6 +31,7 @@ class AlizeTestCase(unittest.TestCase):
                 if fdn.endswith(".pyc") or fdn.endswith(".py"): pass
                 elif fdn.endswith("__pycache__"): pass
                 else:
+                    #L.info(fdn)
                     module = importlib.import_module("%s.service" % fdn)
                     cls.service[module.NAME] = module.FACTORY
             except Exception as e:

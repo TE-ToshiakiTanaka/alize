@@ -16,8 +16,10 @@ class _BH9037HP5U(android_base.Android):
     NAME = "Xperia X Compact"
     WIDTH = "1280"
     HEIGHT = "720"
+    MINICAP_WIDTH = "1280"
+    MINICAP_HEIGHT = "720"
     LOCATE = "H"
-    ROTATE = "0"
+    ROTATE = "90"
 
     EXERCISES_X = "1060"
     EXERCISES_Y = "260"
