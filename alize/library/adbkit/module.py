@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 import glob
@@ -174,6 +175,10 @@ class Android(object):
     def shell(self, cmd, timeout=TIMEOUT):
         return self._adb.shell(cmd, timeout)
 
+    def dumpsys(self, category):
+        cmd = "dumpsys %s" % category
+        return self.shell(cmd)
+
     def snapshot(self, filename, host):
         self._adb.shell('screencap -p /sdcard/%s' % (filename))
         self._adb.pull('/sdcard/%s' % (filename), host)
@@ -260,14 +265,20 @@ class Android(object):
         while self.boot_completed() != "1":
             time.sleep(5)
 
+    def rotate(self):
+        result = self.dumpsys('input').split("\n")
+        for line in result:
+            if line.find('SurfaceOrientation') >= 0:
+                return int(line.split(":")[1])
 
 if __name__ == '__main__':
-    a = Android("YT911C1ZCP")
+    a = Android("BH9037HP5U")
     print(a.get().SERIAL)
+    print(a.rotate())
     #a.invoke("com.dmm.dmmlabo.kancolle/.AppEntry")
-    try:
-        a.snapshot("screen.png", os.path.dirname(os.path.abspath(__file__)))
-    except Exception as e:
-        print(str(e))
+    #try:
+    #    a.snapshot("screen.png", os.path.dirname(os.path.abspath(__file__)))
+    #except Exception as e:
+    #    print(str(e))
     #a.stop("com.dmm.dmmlabo.kancolle/.AppEntry")
     #print a.exec_application(a.get().AURA_DEBUGON, {})

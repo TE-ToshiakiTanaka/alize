@@ -35,7 +35,7 @@ class TestCase_Base(testcase_adb.TestCase_Android):
 
     def minicap_screenshot(self, filename=None):
         if filename == None: filename = "capture.png"
-        return self.minicap_proc.capture_image(filename)
+        return self.proc.capture_image(filename)
 
     def minicap_create_video(self):
         self.proc.create_video(TMP_EVIDENCE_DIR, TMP_VIDEO_DIR)
@@ -69,14 +69,26 @@ class TestCase_Base(testcase_adb.TestCase_Android):
 
     def _tap(self, result, threshold=0.2):
         if self.adb.get().ROTATE == "90":
-            x = int(result.x) + random.randint(int(int(result.width) * threshold) , int(int(result.width) * (1.0 - threshold)))
-            y = int(result.y) + random.randint(int(int(result.height) * threshold) , int(int(result.height) * (1.0 - threshold)))
+            x = self.normalize_w(result.x) + self.randomize(result.width, threshold)
+            y = self.normalize_h(result.y) + self.randomize(result.height, threshold)
         else:
-            x = int(result.y) + random.randint(int(int(result.height) * threshold) , int(int(result.height) * (1.0 - threshold)))
-            y = int(self.adb.get().WIDTH) - (int(result.x) + random.randint(int(int(result.width) * threshold) , int(int(result.width) * (1.0 - threshold))))
+            x = self.normalize_h(result.y) + self.randomize(result.height, threshold)
+            y = int(self.adb.get().WIDTH) - (self.normalize_w(result.x) + self.randomize(result.width, threshold))
         return self.adb.tap(x, y)
 
-    def enable(self, reference, box=None, count=30):
+    def normalize(self, base, real, virtual):
+        return int(base * real / virtual)
+
+    def normalize_w(self, base):
+        return self.normalize(base, int(self.adb.get().WIDTH), int(self.adb.get().MINICAP_WIDTH))
+
+    def normalize_h(self, base):
+        return self.normalize(base, int(self.adb.get().HEIGHT), int(self.adb.get().MINICAP_HEIGHT))
+
+    def randomize(self, base, threshold):
+        return random.randint(int(int(base) * threshold) , int(int(base) * (1.0 - threshold)))
+
+    def enable(self, reference, box=None, count=10):
         L.debug("reference : %s" % reference)
         return (self.proc.search_pattern(self.get_reference(reference), box, count) != None)
 

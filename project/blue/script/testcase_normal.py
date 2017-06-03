@@ -47,15 +47,15 @@ class TestCase(testcase.TestCase_Base):
         if formation == None: return False
         fleet = int(formation) % 3
         if self.adb.get().ROTATE == "0":
-            p = POINT(int(self.adb.get().FORMATION_X) - (int(self.adb.get().FORMATION_WIDTH) * fleet),
-                      int(self.adb.get().FORMATION_Y),
-                      int(self.adb.get().FORMATION_WIDTH),
-                      int(self.adb.get().FORMATION_HEIGHT))
+            p = POINT(self.normalize_w(int(self.adb.get().FORMATION_X) - (self.normalize_w(int(self.adb.get().FORMATION_WIDTH)) * fleet)),
+                      self.normalize_h(int(self.adb.get().FORMATION_Y)),
+                      self.normalize_w(int(self.adb.get().FORMATION_WIDTH)),
+                      self.normalize_h(int(self.adb.get().FORMATION_HEIGHT)))
         else:
-            p = POINT(int(self.adb.get().FORMATION_X),
-                      int(self.adb.get().FORMATION_Y) + (int(self.adb.get().FORMATION_HEIGHT) * fleet),
-                      int(self.adb.get().FORMATION_WIDTH),
-                      int(self.adb.get().FORMATION_HEIGHT))
+            p = POINT(self.normalize_w(int(self.adb.get().FORMATION_X)),
+                      self.normalize_h(int(self.adb.get().FORMATION_Y) + (self.normalize_h(int(self.adb.get().FORMATION_HEIGHT)) * fleet)),
+                      self.normalize_w(int(self.adb.get().FORMATION_WIDTH)),
+                      self.normalize_h(int(self.adb.get().FORMATION_HEIGHT)))
         L.info(p);
         if not self.enable_timeout("form_fleet_1_focus.png", loop=2, timeout=0.2):
             self.tap_timeout("form_fleet_1.png"); self.sleep()
