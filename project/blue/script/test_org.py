@@ -16,22 +16,17 @@ class TestCase(testcase_normal.TestCase):
 
     def test_1(self):
         L.info("*** Capture ***")
-        self.minicap_start()
-        time.sleep(2)
-        #L.debug(self.tap_timeout("action_sortie.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        #L.debug(self.tap_timeout("action_home.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        #L.debug(self.tap_timeout("action_sortie.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        #L.debug(self.tap_timeout("action_home.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        #L.debug(self.tap_timeout("action_sortie.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        #L.debug(self.tap_timeout("action_home.png", POINT(20, 20, 630, 680))); time.sleep(1)
-        time.sleep(2)
-        L.debug(self.enable_timeout("history.png"))
-        time.sleep(2)
-        #L.info(self.screenshot("capture.png"))
-        #time.sleep(1)
-        self.minicap_finish()
-        time.sleep(2)
-        self.minicap_create_video()
+        try:
+            self.minicap_start(); time.sleep(2)
+            #self.login()
+            #L.debug(self.search("home/expedition"))
+            #L.debug(self.tap("home/attack")); time.sleep(2)
+            L.debug(self.initialize(2))
+            time.sleep(2)
+            self.minicap_finish()
+        except Exception as e:
+            self.minicap_finish(); time.sleep(2)
+            self.minicap_create_video()
 
     @classmethod
     def tearDownClass(cls):

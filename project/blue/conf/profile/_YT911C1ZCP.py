@@ -31,9 +31,9 @@ class _YT911C1ZCP(android_base.Android):
     DOCKING_WIDTH = "330"
     DOCKING_HEIGHT = "66"
 
-    FORMATION_X = "220"
-    FORMATION_Y = "270"
-    FORMATION_WIDTH = "325"
+    FORMATION_X = "210"
+    FORMATION_Y = "250"
+    FORMATION_WIDTH = "305"
     FORMATION_HEIGHT = "75"
 
 if __name__ == "__main__":

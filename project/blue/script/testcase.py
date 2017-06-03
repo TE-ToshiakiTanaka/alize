@@ -1,23 +1,14 @@
 import os
-import io
 import sys
 import time
-import fnmatch
+import glob
 import random
-import threading
-from Queue import Queue
-
-import cv2
-from PIL import Image
-import numpy as np
-
-from alize.exception import *
-from alize.cmd import run
 
 from blue.utility import *
 from blue.utility import LOG as L
 from blue.minicap import MinicapProc
 from blue.script import testcase_adb
+from blue.parser import Parser as P
 
 DEBUG=True
 
@@ -48,24 +39,48 @@ class TestCase_Base(testcase_adb.TestCase_Android):
         L.debug("sleep time : %s" % sleep_time)
         time.sleep(sleep_time)
 
-    def get_reference(self, reference):
-        try:
-            return os.path.join(TMP_DIR, "reference", self.adb.get().SERIAL, reference)
-        except Exception as e:
-            L.warning(e); raise e
+    def __box(self, width, height, bounds):
+        x = int((width * int(bounds["s_x"])) / 100.00)
+        y = int((height * int(bounds["s_y"])) / 100.00)
+        width = int((width * int(bounds["f_x"])) / 100.00) - x
+        height = int((height * int(bounds["f_y"])) / 100.00) - y
+        return POINT(x, y, width, height)
 
-    def get_target(self, target):
-        try:
-            return os.path.join(TMP_DIR, target)
-        except Exception as e:
-            L.warning(e); raise e
-
-    def tap(self, reference, box=None, threshold=0.2):
-        result = self.proc.search_pattern(self.get_reference(reference), box)
-        if not result == None:
+    def tap(self, target, box=None, threshold=0.2, count=10):
+        result = self.find(target, box, count)
+        if result != None:
             L.info(self._tap(result, threshold))
             return True
         else: return False
+
+    def find(self, target, box=None, count=10):
+        name, bounds = P.search(self.get_base(target))
+        w = int(self.adb.get().MINICAP_WIDTH)
+        h = int(self.adb.get().MINICAP_HEIGHT)
+        if box == None: box = self.__box(w, h, bounds)
+        for f in glob.glob(os.path.join(self.get_base(target), name)):
+            result = self.proc.search_pattern(os.path.join(self.get_base(target), f), box, count)
+            if result != None: return result
+        return None
+
+    def search(self, target, box=None, count=10):
+        result = self.find(target, box, count)
+        if result != None: return True
+        return False
+
+    def search_timeout(self, target, box=None, loop=3, timeout=0.1):
+        result = False
+        for _ in range(loop):
+            if self.search(target, box, 10): result = True; break
+            time.sleep(timeout)
+        if result == False: self.minicap_screenshot("failed.png")
+        return result
+
+    def get_base(self, target):
+        try:
+            return os.path.join(TMP_REFERENCE_DIR, "kancolle", target)
+        except Exception as e:
+            L.warning(e); raise e
 
     def _tap(self, result, threshold=0.2):
         if self.adb.get().ROTATE == "90":
@@ -82,106 +97,14 @@ class TestCase_Base(testcase_adb.TestCase_Android):
     def normalize_w(self, base):
         return self.normalize(base, int(self.adb.get().WIDTH), int(self.adb.get().MINICAP_WIDTH))
 
+    def conversion_w(self, base):
+        return self.normalize(base, int(self.adb.get().MINICAP_WIDTH), int(self.adb.get().WIDTH))
+
     def normalize_h(self, base):
         return self.normalize(base, int(self.adb.get().HEIGHT), int(self.adb.get().MINICAP_HEIGHT))
 
+    def conversion_h(self, base):
+        return self.normalize(base, int(self.adb.get().MINICAP_HEIGHT), int(self.adb.get().HEIGHT))
+
     def randomize(self, base, threshold):
         return random.randint(int(int(base) * threshold) , int(int(base) * (1.0 - threshold)))
-
-    def enable(self, reference, box=None, count=10):
-        L.debug("reference : %s" % reference)
-        return (self.proc.search_pattern(self.get_reference(reference), box, count) != None)
-
-    def find(self, reference, box=None):
-        L.debug("reference : %s " % reference)
-        result = self.proc.search_pattern(self.get_reference(reference), box)
-        if not result == None: return result
-        else: return None
-
-    def enable_timeout(self, reference, box=None, loop=3, timeout=0.5):
-        result = False
-        for _ in range(loop):
-            if self.enable(reference, box): result = True; break
-            time.sleep(timeout)
-        if result == False: self.minicap_screenshot("failed.png")
-        return result
-
-    def tap_timeout(self, reference, box=None, loop=3, timeout=0.5, threshold=0.2):
-        if not self.enable_timeout(reference, box, loop, timeout):
-            return False
-        return self.tap(reference, box, threshold)
-
-    def enable_pattern_timeout(self, pattern, loop=3, timeout=0.5):
-        targets = self.__search_pattern(pattern)
-        for target in targets:
-            if self.enable_timeout(target, loop=loop, timeout=timeout):
-                return True
-        return False
-
-    def tap_pattern_timeout(self, pattern, loop=3, timeout=0.5):
-        targets = self.__search_pattern(pattern)
-        for target in targets:
-            if self.tap_timeout(target, loop=loop, timeout=timeout):
-                return True
-        return False
-
-    def __search_pattern(self, pattern, host=""):
-        result = []
-        if host == "":
-            host = os.path.join(TMP_DIR, self.adb.get().SERIAL)
-        files = os.listdir(host)
-        return fnmatch.filter(files, pattern)
-
-    def tap_timeout_crop(self, reference, point, filename=None, loop=5, timeout=5):
-        if filename == None:
-            filename = self.adb_screenshot(self.adb.get().TMP_PICTURE)
-        target = self.picture_crop(filename, point,
-            self.get_target("crop_%s" % self.adb.get().TMP_PICTURE))
-        return self.tap_crop_inside(reference, target, point)
-
-    def tap_crop_inside(self, reference, target, point):
-        if target == None:
-            return False
-        result = self.picture_find_pattern(
-            self.get_target(target), self.get_reference(reference))
-        if not result == None:
-            result.x = int(result.x) + int(point.x)
-            result.y = int(result.y) + int(point.y)
-            L.info("Target Point : %s" % result)
-            L.info(self._tap(result))
-            return True
-        else:
-            return False
-
-    def enable_timeout_crop(self, reference, point, filename=None, loop=3, timeout=0.5):
-        if filename == None:
-            filename = self.adb_screenshot(self.adb.get().TMP_PICTURE)
-        target = self.picture_crop(filename, point,
-            self.get_target("crop_%s" % self.adb.get().TMP_PICTURE))
-        return self.enable_timeout(reference, target, loop, timeout)
-
-    def enable_pattern_crop_timeout(self, pattern, point, filename=None, loop=3, timeout=0.5):
-        targets = self.__search_pattern(pattern)
-        for target in targets:
-            if self.enable_timeout_crop(target, point, filename, loop=loop, timeout=timeout):
-                return True
-        return False
-
-    def tap_pattern_crop_timeout(self, pattern, point, filename=None, loop=3, timeout=0.5):
-        targets = self.__search_pattern(pattern)
-        for target in targets:
-            if self.tap_timeout_crop(target, point, filename, loop=loop, timeout=timeout):
-                return True
-        return False
-
-    def tap_pattern_check_timeout(self, pattern, check, loop=3, timeout=0.5):
-        filename = self.adb_screenshot(self.adb.get().TMP_PICTURE)
-        targets = self.__search_pattern(pattern)
-        for target in targets:
-            result = self.find(target, self.adb.get().TMP_PICTURE)
-            L.info("reference : %s : %s" % (target, str(result)))
-            if result == None:
-                pass
-            elif not self.enable_timeout_crop(check, result, loop=loop, timeout=timeout):
-                return self.tap(target, self.adb.get().TMP_PICTURE)
-        return False
