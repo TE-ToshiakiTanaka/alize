@@ -3,6 +3,7 @@ import sys
 import time
 import glob
 import random
+import fnmatch
 
 from blue.utility import *
 from blue.utility import LOG as L
@@ -51,6 +52,15 @@ class TestCase_Base(testcase_adb.TestCase_Android,
         height = int((height * int(bounds["f_y"])) / 100.00) - y
         return POINT(x, y, width, height)
 
+    def tap_crop(self, target, crop_target, threshold=0.2, count=10, _id=None):
+        box_result = self.find_all(crop_target, None, count, id=None)
+        if len(box_result) == 0: return False
+        for r in box_result:
+            L.info(r)
+            result = self.find(target, r, count, id=_id)
+            if result == None: L.info(self._tap(r, threshold))
+        return True
+
     def tap(self, target, box=None, threshold=0.2, count=10, _id=None):
         result = self.find(target, box, count, id=_id)
         if result != None:
@@ -58,11 +68,21 @@ class TestCase_Base(testcase_adb.TestCase_Android,
             return True
         else: return False
 
+    def find_all(self, target, box=None, count=10, id=None):
+        name, bounds = P.search(self.get_base(target))
+        if id != None: name = name % str(id)
+        w = int(self.adb.get().MINICAP_WIDTH)
+        h = int(self.adb.get().MINICAP_HEIGHT)
+        if box == None: box = self.__box(w, h, bounds)
+        res = []
+        for f in glob.glob(os.path.join(self.get_base(target), name)):
+            result = self.proc.search_pattern(os.path.join(self.get_base(target), f), box, count)
+            if result != None: res.append(result)
+        return res
+
     def find(self, target, box=None, count=10, id=None):
         name, bounds = P.search(self.get_base(target))
-        if id != None:
-            name = name % str(id)
-            L.debug(name)
+        if id != None: name = name % str(id)
         w = int(self.adb.get().MINICAP_WIDTH)
         h = int(self.adb.get().MINICAP_HEIGHT)
         if box == None: box = self.__box(w, h, bounds)
@@ -90,13 +110,21 @@ class TestCase_Base(testcase_adb.TestCase_Android,
         except Exception as e:
             L.warning(e); raise e
 
-    def _tap(self, result, threshold=0.2):
-        if self.adb.get().ROTATE == "90":
-            x = self.normalize_w(result.x) + self.randomize(result.width, threshold)
-            y = self.normalize_h(result.y) + self.randomize(result.height, threshold)
+    def _tap(self, result, random=True, threshold=0.2):
+        if random:
+            if self.adb.get().ROTATE == "90":
+                x = self.normalize_w(result.x) + self.randomize(result.width, threshold)
+                y = self.normalize_h(result.y) + self.randomize(result.height, threshold)
+            else:
+                x = self.normalize_h(result.y) + self.randomize(result.height, threshold)
+                y = int(self.adb.get().WIDTH) - (self.normalize_w(result.x) + self.randomize(result.width, threshold))
         else:
-            x = self.normalize_h(result.y) + self.randomize(result.height, threshold)
-            y = int(self.adb.get().WIDTH) - (self.normalize_w(result.x) + self.randomize(result.width, threshold))
+            if self.adb.get().ROTATE == "90":
+                x = self.normalize_w(result.x)
+                y = self.normalize_h(result.y)
+            else:
+                x = self.normalize_h(result.y)
+                y = int(self.adb.get().WIDTH) - (self.normalize_w(result.x))
         return self.adb.tap(x, y)
 
     def normalize(self, base, real, virtual):

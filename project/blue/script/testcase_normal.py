@@ -125,3 +125,50 @@ class TestCase(testcase.TestCase_Base):
 
     def __fleet_focus(self, fleet):
         return "basic/fleet_focus/%s" % fleet
+
+    def quest(self):
+        if not self.search("home"):
+            return False
+        self.tap("home/quest"); self.sleep()
+        self.tap("quest"); self.sleep()
+        self.slack_message(self.get("bot.quest_done"))
+        self.quest_done(); self.sleep()
+        self.slack_message(self.get("bot.quest_check"))
+        self.quest_daily(); self.sleep()
+        self.quest_weekly(); self.sleep()
+        if not self.search("quest/mission"):
+            return False
+        self.tap("quest/perform"); self.sleep()
+        self.__upload("quest_%s" % self.adb.get().TMP_PICTURE)
+        self.tap("quest/return"); self.sleep()
+        return True
+
+    def quest_done(self):
+        if not self.search("quest/mission"):
+            return False
+        self.tap("quest/perform"); self.sleep()
+        while self.tap("quest/done"):
+            self.sleep()
+            self.tap("quest/close"); time.sleep(4)
+        return True
+
+    def quest_daily(self, exercises=False):
+        if not self.search("quest/mission"):
+            return False
+        self.tap("quest/daily"); self.sleep(); time.sleep(4)
+        self.tap_crop("quest/acceptance", "quest/daily/attack"); self.sleep()
+        self.tap_crop("quest/acceptance", "quest/daily/expedition"); self.sleep()
+        self.tap_crop("quest/acceptance", "quest/daily/supply"); self.sleep()
+        if exercises:
+            self.tap_crop("quest/acceptance", "quest/daily/exercises"); self.sleep()
+        return True
+
+    def quest_weekly(self, exercises=False):
+        if not self.search("quest/mission"):
+            return False
+        self.tap("quest/weekly"); self.sleep(); time.sleep(4)
+        self.tap_crop("quest/acceptance", "quest/weekly/attack"); self.sleep()
+        self.tap_crop("quest/acceptance", "quest/weekly/expedition"); self.sleep()
+        if exercises:
+            self.tap_crop("quest/acceptance", "quest/weekly/exercises"); self.sleep()
+        return True
