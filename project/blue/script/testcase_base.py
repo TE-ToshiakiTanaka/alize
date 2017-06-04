@@ -16,7 +16,7 @@ from blue.utility import LOG as L
 class TestCase_Unit(AlizeTestCase):
     def __init__(self, *args, **kwargs):
         super(TestCase_Unit, self).__init__(*args, **kwargs)
-        self.get_config()
+        self.get_config(self.get("args.config"))
         self.get_service()
         self.service = MinicapService("minicap", self.get("args.mobile"),
             self.adb.get().HEIGHT, self.adb.get().WIDTH,
@@ -32,6 +32,14 @@ class TestCase_Unit(AlizeTestCase):
                             help='TestCase Name.')
         parser.add_argument('-m', action='store', dest='mobile',
                             help='Mobile (Android) Serial ID.')
+        parser.add_argument('-f', action='store', dest='fleet',
+                            help='Fleet Number. (1 ~ 4)')
+        parser.add_argument('-e', action='store', dest='expedition',
+                            help='Expedition ID.')
+        parser.add_argument('-s', action='store', dest='slack',
+                            help='target slack api token.')
+        parser.add_argument('-c', action='store', dest='config',
+                            help='Configure File.')
         return parser
 
     @classmethod
@@ -39,6 +47,12 @@ class TestCase_Unit(AlizeTestCase):
         cls.adb = cls.service["alize.android"].get(cls.get("args.mobile"), PROFILE_DIR)
         cls.minicap = cls.service["alize.minicap"].get(cls.get("minicap.ip"), int(cls.get("minicap.port")))
         cls.pic = cls.service["alize.picture"].get()
+
+        if cls.get("args.slack") == None:
+            serial = cls.get("slack.serial")
+        else:
+            serial = cls.get("args.slack")
+        cls.slack = cls.service["alize.slack"].get(serial)
 
     def get_config(cls, conf=None):
         if conf == None:

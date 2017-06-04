@@ -7,12 +7,17 @@ import random
 from blue.utility import *
 from blue.utility import LOG as L
 from blue.minicap import MinicapProc
-from blue.script import testcase_adb
 from blue.parser import Parser as P
+
+from blue.script import testcase_adb
+from blue.script import testcase_picture
+from blue.script import testcase_slack
 
 DEBUG=True
 
-class TestCase_Base(testcase_adb.TestCase_Android):
+class TestCase_Base(testcase_adb.TestCase_Android,
+                    testcase_picture.TestCase_Picture,
+                    testcase_slack.TestCase_Slack):
     def __init__(self, *args, **kwargs):
         super(TestCase_Base, self).__init__(*args, **kwargs)
         self.proc = MinicapProc(self, DEBUG)
@@ -46,15 +51,18 @@ class TestCase_Base(testcase_adb.TestCase_Android):
         height = int((height * int(bounds["f_y"])) / 100.00) - y
         return POINT(x, y, width, height)
 
-    def tap(self, target, box=None, threshold=0.2, count=10):
-        result = self.find(target, box, count)
+    def tap(self, target, box=None, threshold=0.2, count=10, _id=None):
+        result = self.find(target, box, count, id=_id)
         if result != None:
             L.info(self._tap(result, threshold))
             return True
         else: return False
 
-    def find(self, target, box=None, count=10):
+    def find(self, target, box=None, count=10, id=None):
         name, bounds = P.search(self.get_base(target))
+        if id != None:
+            name = name % str(id)
+            L.debug(name)
         w = int(self.adb.get().MINICAP_WIDTH)
         h = int(self.adb.get().MINICAP_HEIGHT)
         if box == None: box = self.__box(w, h, bounds)
@@ -63,8 +71,8 @@ class TestCase_Base(testcase_adb.TestCase_Android):
             if result != None: return result
         return None
 
-    def search(self, target, box=None, count=10):
-        result = self.find(target, box, count)
+    def search(self, target, box=None, count=10, _id=None):
+        result = self.find(target, box, count, id=_id)
         if result != None: return True
         return False
 

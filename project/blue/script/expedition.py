@@ -17,11 +17,16 @@ class TestCase(testcase_normal.TestCase):
     def test_expedition(self):
         L.info("*** Expedition ***")
         try:
-            self.minicap_start()
-            time.sleep(2)
-            self.assertTrue(self.initialize("15"))
-            #while self.expedition_result(): time.sleep(1)
-            time.sleep(2)
+            self.minicap_start(); time.sleep(2)
+            self.assertTrue(self.initialize())
+            while self.expedition_result(): time.sleep(1)
+            self.slack_message(self.get("bot.expedition") % self.get("args.fleet"))
+            self.assertTrue(self.supply(self.get("args.fleet")))
+            self.assertTrue(self.home())
+            self.assertTrue(self.expedition(
+                self.get("args.fleet"), self.get("args.expedition")))
+            self.assertTrue(self.home())
+            while self.expedition_result(): time.sleep(1)
             self.minicap_finish()
         except Exception as e:
             self.minicap_finish()
