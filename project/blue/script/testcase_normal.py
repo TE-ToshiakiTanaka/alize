@@ -49,7 +49,7 @@ class TestCase(testcase.TestCase_Base):
         else:
             return False
 
-    def formation(self, formation):v
+    def formation(self, formation):
         self.tap("formation/change"); self.sleep()
         if not self.search("formation/deploy"):
             return False
@@ -86,12 +86,14 @@ class TestCase(testcase.TestCase_Base):
             self.slack_message(self.get("bot.attack_rack")); self.home(); return True
         if self.search("attack/damage"):
             self.slack_message(self.get("bot.attack_damage")); self.home(); return True
-        self.tap("attack/start"); self.sleep(4)
+        self.search("attack/start"); self.sleep(4)
         if self.search("attack/unable"):
             self.slack_message(self.get("bot.attack_failed"))
             self.home(); return False
+        """
         self.slack_message(self.get("bot.attack_success"))
         return self.search("attack/compass")
+        """
 
     def __attack_stage(self, id):
         if int(id) > 30: self.tap("attack/stage", _id="6"); self.sleep()
