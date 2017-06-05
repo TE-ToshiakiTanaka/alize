@@ -45,7 +45,7 @@ class TestCase(testcase.TestCase_Base):
                 self.slack_message(self.get("bot.expedition_success"))
             elif self.search("home\\expedition\\failed"):
                 self.slack_message(self.get("bot.expedition_failed"))
-            self.tap("basic\\next"): time.sleep(1)
+            self.tap("basic\\next"); time.sleep(1)
             self.__upload()
             self.tap("basic\\next"); time.sleep(2)
             return self.search("home\\expedition")
