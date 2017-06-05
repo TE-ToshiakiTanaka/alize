@@ -49,7 +49,7 @@ class TestCase(testcase.TestCase_Base):
         else:
             return False
 
-    def formation(self, formation):
+    def formation(self, formation):v
         self.tap("formation/change"); self.sleep()
         if not self.search("formation/deploy"):
             return False
@@ -72,6 +72,55 @@ class TestCase(testcase.TestCase_Base):
         time.sleep(3)
         self.__upload("formation_%s.png" % self.adb.get().SERIAL)
         return self.home()
+
+    def attack(self, fleet, id):
+        if not self.search("home"): return False
+        self.tap("home/attack"); self.sleep()
+        self.tap("attack"); time.sleep(2)
+        self.__attack_stage(id)
+        self.__attack_id(id)
+        self.tap("attack/decide"); self.sleep()
+        if not self.search(self.__fleet_focus(fleet)):
+            self.tap(self.__fleet(fleet)); self.sleep(2)
+        if self.search("attack/rack"):
+            self.slack_message(self.get("bot.attack_rack")); self.home(); return True
+        if self.search("attack/damage"):
+            self.slack_message(self.get("bot.attack_damage")); self.home(); return True
+        self.tap("attack/start"); self.sleep(4)
+        if self.search("attack/unable"):
+            self.slack_message(self.get("bot.attack_failed"))
+            self.home(); return False
+        self.slack_message(self.get("bot.attack_success"))
+        return self.search("attack/compass")
+
+    def __attack_stage(self, id):
+        if int(id) > 30: self.tap("attack/stage", _id="6"); self.sleep()
+        elif int(id) > 24: self.tap("attack/stage", _id="5"); self.sleep()
+        elif int(id) > 18: self.tap("attack/stage", _id="4"); self.sleep()
+        elif int(id) > 12: self.tap("attack/stage", _id="3"); self.sleep()
+        elif int(id) > 6: self.tap("attack/stage", _id="2"); self.sleep()
+        else: pass
+
+    def __attack_id(self, id):
+        self.tap("attack/id", _id=id); self.sleep()
+
+    def battle(self):
+        if not self.search("attack/compass"):
+            if self.search("home"): return True
+            else: return False
+        self.tap("attack/compass")
+        while not self.search("basic/next"):
+            if self.tap_timeout("attack/formation/1"): self.sleep(10)
+            if self.tap_timeout("attack/night_battle/stop"): self.sleep(5)
+            self.sleep(10)
+        while self.tap("basic/next"): self.sleep(2)
+        while self.search("attack/withdrawal"):
+            if self.search("basic/next"):
+                self.__upload("drop_%s.png" % self.adb.get().SERIAL)
+                self.tap("basic/next")
+        self.tap("attack/withdrawal"); time.sleep(5)
+        self.slack_message(self.get("bot.attack_return"))
+        return self.search("home")
 
     def supply(self, fleet):
         if not self.search("home"):
