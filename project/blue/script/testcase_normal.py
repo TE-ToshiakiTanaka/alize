@@ -27,7 +27,7 @@ class TestCase(testcase.TestCase_Base):
         else: return self.formation(form)
 
     def home(self):
-        self.tap("basic/home"); time.sleep(3)
+        self.tap("basic/home"); self.sleep(4)
         return self.search("home")
 
     def login(self):
@@ -40,11 +40,11 @@ class TestCase(testcase.TestCase_Base):
 
     def expedition_result(self):
         if self.search("home/expedition"):
-            self.tap("home/expedition"); time.sleep(7)
+            self.tap("home/expedition"); time.sleep(9)
             if self.search("home/expedition/success"): pass
             elif self.search("home/expedition/failed"): pass
-            self.tap("basic/next"); time.sleep(1)
-            self.tap("basic/next"); time.sleep(1)
+            while self.tap("basic/next"):
+                time.sleep(1)
             return self.search("home/expedition")
         else:
             return False
@@ -126,7 +126,65 @@ class TestCase(testcase.TestCase_Base):
     def __fleet_focus(self, fleet):
         return "basic/fleet_focus/%s" % fleet
 
-    def quest(self):
+    def exercises(self):
+        if not self.search("home"):
+            return False
+        self.tap("home/attack"); self.sleep()
+        self.tap("exercises"); self.sleep(4)
+        if not self.search("exercises/select"):
+            self.home(); return False
+        p = POINT(self.conversion_w(int(self.adb.get().EXERCISES_X)),
+                  self.conversion_h(int(self.adb.get().EXERCISES_Y)),
+                  self.conversion_w(int(self.adb.get().EXERCISES_WIDTH)),
+                  self.conversion_h(int(self.adb.get().EXERCISES_HEIGHT)))
+        flag = True
+        for _ in xrange(5):
+            if self.search("exercises/win", p):
+                L.info("I'm already fighting. I won.")
+            elif self.search("exercises/lose", p):
+                L.info("I'm already fighting. I lost.")
+            else:
+                L.info(p);
+                self._tap(p, threshold=0.49); self.sleep(3)
+                fname = self.adb_screenshot("exercises_%s.png" % self.adb.get().SERIAL)
+                if self.adb.get().LOCATE == "V":
+                    self.picture_rotate(fname, "90")
+                self.picture_resize(fname, "360P")
+                self.tap("exercises/decide"); self.sleep()
+                if self.search("exercises/unable"):
+                    self.tap("exercises/return"); self.sleep()
+                    self.tap("exercises/x"); self.sleep()
+                    self.home(); return False
+                self.slack_upload(fname)
+                if self.tap("exercises/start"):
+                    self.slack_message(self.get("bot.exercises_start")); self.sleep(5)
+                    while not self.search("basic/next"):
+                        if self.tap("attack/formation/1"): self.sleep(10)
+                        if self.tap("attack/night_battle/start"):
+                            self.slack_message(self.get("bot.night_battle_start"))
+                            self.sleep()
+                        time.sleep(10)
+                    if self.search("attack/result/d"): self.slack_message(self.get("bot.result_d"))
+                    elif self.search("attack/result/c"): self.slack_message(self.get("bot.result_c"))
+                    elif self.search("attack/result/b"): self.slack_message(self.get("bot.result_b"))
+                    elif self.search("attack/result/a"): self.slack_message(self.get("bot.result_a"))
+                    else: self.slack_message(self.get("bot.result_s"))
+                    while self.tap("basic/next"): time.sleep(5)
+                    flag = False
+                    break
+            self.sleep(1)
+            if self.adb.get().LOCATE == "V":
+                p.x = int(p.x) - int(p.width); L.info("Point : %s" % str(p))
+            else:
+                p.y = int(p.y) + int(p.height); L.info("Point : %s" % str(p))
+        if flag:
+            self.slack_message(self.get("bot.exercises_result"))
+            self.__upload()
+            self.home(); return False
+        self.sleep(3)
+        return self.home()
+
+    def quest(self, exercises=False):
         if not self.search("home"):
             return False
         self.tap("home/quest"); self.sleep()
@@ -134,8 +192,8 @@ class TestCase(testcase.TestCase_Base):
         self.slack_message(self.get("bot.quest_done"))
         self.quest_done(); self.sleep()
         self.slack_message(self.get("bot.quest_check"))
-        self.quest_daily(); self.sleep()
-        self.quest_weekly(); self.sleep()
+        self.quest_daily(exercises); self.sleep()
+        self.quest_weekly(exercises); self.sleep()
         if not self.search("quest/mission"):
             return False
         self.tap("quest/perform"); self.sleep()
@@ -146,9 +204,9 @@ class TestCase(testcase.TestCase_Base):
     def quest_done(self):
         if not self.search("quest/mission"):
             return False
-        self.tap("quest/perform"); self.sleep()
+        self.tap("quest/perform"); self.sleep(3)
         while self.tap("quest/done"):
-            self.sleep()
+            self.sleep(2)
             self.tap("quest/close"); time.sleep(4)
         return True
 

@@ -41,7 +41,7 @@ class TestCase_Base(testcase_adb.TestCase_Android,
         return self.proc.search_pattern(self.get_reference(reference), box, count)
 
     def sleep(self, base=1):
-        sleep_time = (0.5 + base * random.random())
+        sleep_time = (base - 0.5 * random.random())
         L.debug("sleep time : %s" % sleep_time)
         time.sleep(sleep_time)
 
