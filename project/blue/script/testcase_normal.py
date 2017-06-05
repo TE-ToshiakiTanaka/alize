@@ -294,6 +294,7 @@ class TestCase(testcase.TestCase_Base):
         if not self.search("quest\\mission"):
             return False
         self.tap("quest\\perform"); self.sleep()
+        time.sleep(4)
         self.__upload("quest_%s" % self.adb.get().TMP_PICTURE)
         self.tap("quest\\return"); self.sleep()
         return True
