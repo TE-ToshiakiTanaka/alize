@@ -14,7 +14,7 @@ from blue.script import testcase_adb
 from blue.script import testcase_picture
 from blue.script import testcase_slack
 
-DEBUG=True
+DEBUG=False
 
 class TestCase_Base(testcase_adb.TestCase_Android,
                     testcase_picture.TestCase_Picture,

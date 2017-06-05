@@ -25,7 +25,7 @@ class PatternMatchObject(object):
         return "PatternMatchObject()"
 
     def __str__(self):
-        return "Target, Box : %s, %s" % (self.target, self.box)
+        return "Target, Box : %s, %s" % (os.path.basename(self.target), self.box)
 
 class MinicapProc(object):
     def __init__(self, parent, debug=False):
@@ -67,9 +67,10 @@ class MinicapProc(object):
 
     def search_pattern(self, target, box=None, timeout=5):
         self._pattern_match = PatternMatchObject(target, box)
+        L.info(self._pattern_match)
         for _ in xrange(timeout):
             result = self.patternmatch_result.get()
-            #if result != None: break;
+            if result != None: break;
         self._pattern_match = None
         return result
 
