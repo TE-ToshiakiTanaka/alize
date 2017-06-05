@@ -40,10 +40,20 @@ class TestCase_Unit(AlizeTestCase):
                             help='Fleet Number. (1 ~ 4)')
         parser.add_argument('-e', action='store', dest='expedition',
                             help='Expedition ID.')
+        parser.add_argument('-j', action='store', dest='job',
+                            help='Jenkins Job.')
+        parser.add_argument('-t', action='store', dest='timeout',
+                            help='Timeout.')
+        parser.add_argument('-u', action='store', dest='url',
+                            help='target Jenkins URL.')
         parser.add_argument('-s', action='store', dest='slack',
                             help='target slack api token.')
         parser.add_argument('-c', action='store', dest='config',
                             help='Configure File.')
+        parser.add_argument('-i', action='store', dest='userid',
+                            help='jenkins userid.')
+        parser.add_argument('-p', action='store', dest='token',
+                            help='jenkins api token.')
         return parser
 
     @classmethod
