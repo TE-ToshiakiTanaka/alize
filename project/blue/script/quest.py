@@ -21,7 +21,7 @@ class TestCase(testcase_normal.TestCase):
             self.assertTrue(self.initialize())
             while self.expedition_result(): time.sleep(1)
             self.slack_message(self.get("bot.quest"))
-            self.assertTrue(self.quest(exercises=True))
+            self.assertTrue(self.quest(exercises=False))
             while self.expedition_result(): time.sleep(1)
             self.minicap_finish()
         except Exception as e:
