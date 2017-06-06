@@ -31,6 +31,7 @@ class TestCase(testcase_normal.TestCase):
         except Exception as e:
             self.minicap_finish()
             time.sleep(2); self.minicap_create_video()
+            self.fail()
 
     @classmethod
     def tearDownClass(cls):
