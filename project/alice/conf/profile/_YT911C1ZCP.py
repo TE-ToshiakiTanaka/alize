@@ -18,8 +18,8 @@ class _YT911C1ZCP(android_base.Android):
     HEIGHT = "720"
     MINICAP_WIDTH = "1280"
     MINICAP_HEIGHT = "720"
-    LOCATE = "H"
-    ROTATE = "90"
+    LOCATE = "V"
+    ROTATE = "0"
 
     EXERCISES_X = "1060"
     EXERCISES_Y = "260"

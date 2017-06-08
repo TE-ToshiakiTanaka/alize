@@ -12,8 +12,8 @@ import numpy as np
 from alize.exception import *
 from alize.cmd import run
 
-from blue.utility import *
-from blue.utility import LOG as L
+from alice.utility import *
+from alice.utility import LOG as L
 
 
 class PatternMatchObject(object):

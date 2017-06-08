@@ -7,12 +7,14 @@ from alize import log
 DEBUG = True
 
 WORK_DIR = os.path.normpath(os.path.dirname(__file__))
+SCRIPT_DIR = os.path.normpath(os.path.join(WORK_DIR, "script"))
 TMP_DIR = os.path.normpath(os.path.join(WORK_DIR, "tmp"))
 TMP_REFERENCE_DIR = os.path.join(os.path.join(TMP_DIR, "reference"))
 TMP_EVIDENCE_DIR = os.path.normpath(os.path.join(TMP_DIR, "evidence"))
 TMP_VIDEO_DIR = os.path.normpath(os.path.join(TMP_DIR, "video"))
 LOG_DIR = os.path.normpath(os.path.join(WORK_DIR, "log"))
 BIN_DIR = os.path.normpath(os.path.join(WORK_DIR, "bin"))
+REPORT_DIR = os.path.normpath(os.path.join(WORK_DIR, "report"))
 
 PROFILE_DIR = os.path.normpath(os.path.join(WORK_DIR, "conf", "profile"))
 FFMPEG_BIN = os.path.normpath(os.path.join(BIN_DIR, "ffmpeg", "bin", "ffmpeg.exe"))
