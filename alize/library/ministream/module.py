@@ -14,7 +14,7 @@ import numpy as np
 from PIL import Image
 
 L = Log("Minicap.Library.ALIZE")
-MAX_SIZE = 5
+MAX_SIZE = 2
 
 class Banner(object):
 
