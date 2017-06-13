@@ -29,6 +29,8 @@ class TestRunner(object):
         self.workspace.rmdir(os.path.join("tmp", "evidence"))
         self.tmp_evidence = self.workspace.mkdir(os.path.join("tmp","evidence"))
 
+        self.workspace.touch("flag.txt", host=self.tmp)
+
         #TestCase_Unit.register(LIB_DIR)
 
     def execute(self, script):

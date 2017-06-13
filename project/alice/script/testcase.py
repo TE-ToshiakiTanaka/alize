@@ -39,7 +39,7 @@ class TestCase_Base(testcase_base.TestCase_Unit):
 
     def sleep(self, base=1):
         sleep_time = (base - 0.5 * random.random())
-        L.debug("sleep time : %s" % sleep_time)
+        #L.debug("sleep time : %s" % sleep_time)
         time.sleep(sleep_time)
 
     def __box(self, width, height, bounds):
@@ -123,6 +123,12 @@ class TestCase_Base(testcase_base.TestCase_Unit):
             x = self.normalize_w(result.x)
             y = self.normalize_h(result.y)
         return self.adb.tap(x, y)
+
+    def _swipe(self, result, random=True, threshold=0.2):
+        x1 = self.normalize_w(result.x); x2 = self.normalize_w(result.x + result.width)
+        y1 = self.normalize_h(result.y); y2 = self.normalize_h(result.y + result.height)
+        cmd = "swipe %s %s %s %s" % (str(x1), str(y1), str(x2), str(y2))
+        return self.adb.input(cmd)
 
     def normalize(self, base, real, virtual):
         return int(base * real / virtual)
